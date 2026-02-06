@@ -13,15 +13,6 @@ interface Vendor {
 interface VendorPanelProps {
   vendors: Vendor[];
 
-  onAddVendor: (data: {
-    name: string;
-    category: string;
-    priceMin: number;
-    priceMax: number;
-    description?: string | null;
-    avgPrepTime: number;
-  }) => void;
-
   onEditVendor: (id: string, data: {
     name: string;
     category: string;
@@ -47,14 +38,12 @@ const DEFAULT_CATEGORY = "Food";
 
 export default function VendorPanel({
   vendors,
-  onAddVendor,
   onEditVendor,
   onDeleteVendor,
 }: VendorPanelProps) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
 
-  const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -94,12 +83,6 @@ export default function VendorPanel({
     });
   };
 
-  const startAdd = () => {
-    resetForm();
-    setEditingId(null);
-    setIsAdding(true);
-  };
-
   const startEdit = (v: Vendor) => {
     setFormData({
       name: v.name,
@@ -109,7 +92,6 @@ export default function VendorPanel({
       description: v.description ?? "",
     });
     setEditingId(v.id);
-    setIsAdding(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -141,9 +123,6 @@ export default function VendorPanel({
     if (editingId) {
       onEditVendor(editingId, payload);
       setEditingId(null);
-    } else {
-      onAddVendor(payload);
-      setIsAdding(false);
     }
 
     resetForm();
@@ -184,12 +163,6 @@ export default function VendorPanel({
           </button>
         </div>
 
-        <button
-          onClick={startAdd}
-          className="mt-2 w-full bg-green-600 text-white py-1 px-3 rounded text-sm hover:bg-green-700"
-        >
-          + Add Vendor
-        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
@@ -225,10 +198,10 @@ export default function VendorPanel({
       </div>
 
       {/* Modal / Overlay for Add/Edit */}
-      {(isAdding || editingId) && (
+      {editingId && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded p-4 w-full max-w-sm shadow-xl max-h-[85vh] flex flex-col">
-            <h3 className="font-bold mb-4">{editingId ? "Edit Vendor" : "Add Vendor"}</h3>
+            <h3 className="font-bold mb-4">Edit Vendor</h3>
 
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pr-1">
               <div className="mb-3">
@@ -292,7 +265,7 @@ export default function VendorPanel({
               <div className="flex justify-end gap-2 pt-4 border-t mt-4 sticky bottom-0 bg-white">
                 <button
                   type="button"
-                  onClick={() => { setIsAdding(false); setEditingId(null); }}
+                  onClick={() => { setEditingId(null); }}
                   className="px-3 py-1 border rounded text-gray-600 hover:bg-gray-100"
                 >
                   Cancel

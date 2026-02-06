@@ -1,8 +1,13 @@
-  import { useAuth } from "../state/AuthContext";
+import { useAuth } from "../state/AuthContext";
 
-  export const API_BASE = import.meta.env.VITE_API_URL ?? "";
-  if (!API_BASE) console.warn("VITE_API_URL is not set");
-  console.log("API_BASE =", API_BASE);
+const API_BASE_RAW = import.meta.env.VITE_API_URL ?? "";
+export const API_BASE = API_BASE_RAW.replace(/\/+$/, "");
+if (!API_BASE) {
+  console.warn("VITE_API_URL is not set");
+  if (import.meta.env.PROD) {
+    throw new Error("VITE_API_URL is not set");
+  }
+}
 
   export async function apiFetch<T>(input: string, init?: RequestInit, token?: string | null): Promise<T> {
     const headers = new Headers(init?.headers || {});

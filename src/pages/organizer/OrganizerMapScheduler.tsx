@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { apiClient, API_BASE } from "../../api/client";
+import { apiClient } from "../../api/client";
 import { useAuth } from "../../state/AuthContext";
 import { toAbsUrl } from "../../utils/url";
 import OrganizerMapCanvas from "../../components/organizer/OrganizerMapCanvas";
@@ -249,28 +249,6 @@ const OrganizerMapScheduler: React.FC = () => {
   };
 
   // Vendor handlers
-  const handleAddVendor = async (vData: {
-    name: string;
-    category: string;
-    priceMin: number;
-    priceMax: number;
-    description?: string | null;
-    avgPrepTime: number;
-  }) => {
-    if (!eventSlug || !token) return;
-    try {
-      await apiClient.post(
-        `/organizer/events/${String(eventSlug)}/vendors`,
-        vData,
-        token
-      );
-      showNotify("Vendor added");
-      await loadData();
-    } catch (err: any) {
-      showNotify(err.message || "Failed to add vendor", "error");
-    }
-  };
-
   const handleEditVendor = async (
     id: string,
     vData: {
@@ -374,7 +352,6 @@ const OrganizerMapScheduler: React.FC = () => {
         >
           <VendorPanel
             vendors={data.vendors}
-            onAddVendor={handleAddVendor}
             onEditVendor={handleEditVendor}
             onDeleteVendor={handleDeleteVendor}
           />
