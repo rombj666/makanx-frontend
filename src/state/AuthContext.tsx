@@ -9,6 +9,7 @@ export interface AuthUser {
   role: UserRole;
   vendorId?: string | null;
   eventId?: string | null;
+  mustResetPassword?: boolean;
 }
 
 interface AuthContextValue {
@@ -61,4 +62,3 @@ export function useAuth() {
   }
   return ctx;
 }
-

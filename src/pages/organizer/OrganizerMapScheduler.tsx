@@ -64,7 +64,8 @@ type SalesResponse = {
 };
 
 const OrganizerMapScheduler: React.FC = () => {
-  const { eventId } = useParams();
+  const { eventSlug } = useParams<{ eventSlug: string }>();
+  console.log("eventSlug param =", eventSlug);
   const navigate = useNavigate();
   const { token } = useAuth();
 
@@ -95,10 +96,10 @@ const OrganizerMapScheduler: React.FC = () => {
   };
 
   const loadData = async () => {
-    if (!eventId || !token) return;
+    if (!eventSlug || !token) return;
     try {
       const res = await apiClient.get<EditorResponse>(
-        `/organizer/events/${String(eventId)}/editor`,
+        `/organizer/events/${String(eventSlug)}/editor`,
         token
       );
       setData(res);
@@ -110,10 +111,10 @@ const OrganizerMapScheduler: React.FC = () => {
   };
 
   const fetchSales = async () => {
-    if (!eventId || !token) return;
+    if (!eventSlug || !token) return;
     try {
       const res = await apiClient.get<SalesResponse>(
-        `/organizer/events/${String(eventId)}/sales`,
+        `/organizer/events/${String(eventSlug)}/sales`,
         token
       );
       setSalesData(res);
@@ -126,7 +127,7 @@ const OrganizerMapScheduler: React.FC = () => {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId, token]);
+  }, [eventSlug, token]);
 
   // ---- Local optimistic booth update (prevents UI glitch) ----
   const patchBoothLocal = (
@@ -168,7 +169,7 @@ const OrganizerMapScheduler: React.FC = () => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
 
-    if (!eventId || !token) return;
+    if (!eventSlug || !token) return;
 
     const formData = new FormData();
     formData.append("map", file);
@@ -178,7 +179,7 @@ const OrganizerMapScheduler: React.FC = () => {
       
       // Use apiClient.postForm for multipart upload
       await apiClient.postForm(
-        `/organizer/events/${String(eventId)}/map-upload`,
+        `/organizer/events/${String(eventSlug)}/map-upload`,
         formData,
         token
       );
@@ -194,13 +195,13 @@ const OrganizerMapScheduler: React.FC = () => {
   };
 
   const handleAddBooth = async () => {
-    if (!eventId || !token) return;
+    if (!eventSlug || !token) return;
     try {
       const x = viewCenter.x - 50;
       const y = viewCenter.y - 50;
 
       await apiClient.post(
-        `/organizer/events/${String(eventId)}/booths`,
+        `/organizer/events/${String(eventSlug)}/booths`,
         { label: "New Booth", posX: x, posY: y, width: 100, height: 100 },
         token
       );
@@ -256,10 +257,10 @@ const OrganizerMapScheduler: React.FC = () => {
     description?: string | null;
     avgPrepTime: number;
   }) => {
-    if (!eventId || !token) return;
+    if (!eventSlug || !token) return;
     try {
       await apiClient.post(
-        `/organizer/events/${String(eventId)}/vendors`,
+        `/organizer/events/${String(eventSlug)}/vendors`,
         vData,
         token
       );

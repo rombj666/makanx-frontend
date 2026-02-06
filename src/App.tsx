@@ -6,6 +6,7 @@ import {
   Navigate,
   useNavigate,
   useParams,
+  useLocation,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./state/AuthContext";
 import { CartProvider } from "./state/CartContext";
@@ -24,6 +25,7 @@ import OrganizerMapScheduler from "./pages/organizer/OrganizerMapScheduler";
 import VendorMap from "./pages/vendor/VendorMap";
 import VendorMenuEditor from "./pages/vendor/VendorMenuEditor";
 import VendorOrders from "./pages/vendor/VendorOrders";
+import ResetPassword from "./pages/ResetPassword";
 
 /**
  * PrivateRoute
@@ -38,9 +40,18 @@ const PrivateRoute = ({
   allowedRoles?: string[];
 }) => {
   const { user, token } = useAuth();
+  const location = useLocation();
 
   if (!token) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (
+    user?.role === "VENDOR" &&
+    user.mustResetPassword &&
+    location.pathname !== "/reset-password"
+  ) {
+    return <Navigate to="/reset-password" replace />;
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
@@ -74,6 +85,10 @@ const RoleRedirect = () => {
 
     const redirect = async () => {
       try {
+        if (user.role === "VENDOR" && user.mustResetPassword) {
+          navigate("/reset-password", { replace: true });
+          return;
+        }
         if (user.role === "VENDOR") {
           navigate("/vendor/orders", { replace: true });
           return;
@@ -124,6 +139,14 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route
+        path="/reset-password"
+        element={
+          <PrivateRoute allowedRoles={["VENDOR"]}>
+            <ResetPassword />
+          </PrivateRoute>
+        }
+      />
 
       {/* Default entry after login */}
       <Route
@@ -242,7 +265,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/organizer/events/:eventId"
+        path="/organizer/events/:eventSlug"
         element={
           <PrivateRoute allowedRoles={["ORGANIZER"]}>
             <OrganizerMapScheduler />

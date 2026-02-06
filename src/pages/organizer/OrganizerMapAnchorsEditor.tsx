@@ -6,7 +6,8 @@ import MapAnchorsCanvas, { MapAnchors } from "../../components/map/MapAnchorsCan
 import VendorBottomSheet from "../../components/map/VendorBottomSheet";
 
 export default function OrganizerMapAnchorsEditor() {
-  const { eventId } = useParams();
+  const { eventSlug } = useParams<{ eventSlug: string }>();
+  console.log("eventSlug param =", eventSlug);
   const navigate = useNavigate();
   const { token } = useAuth();
   
@@ -28,11 +29,11 @@ export default function OrganizerMapAnchorsEditor() {
   }, [notification]);
 
   useEffect(() => {
-    if (!eventId || !token) return;
+    if (!eventSlug || !token) return;
     
     Promise.all([
-        apiClient.get(`/organizer/events/${eventId}/editor`, token),
-        apiClient.get(`/organizer/events/${eventId}/map-anchors`, token)
+        apiClient.get(`/organizer/events/${eventSlug}/editor`, token),
+        apiClient.get(`/organizer/events/${eventSlug}/map-anchors`, token)
     ]).then(([editorData, anchorData]: [any, any]) => {
         setEvent(editorData.event);
         if (anchorData.mapAnchorsJson) {
@@ -48,12 +49,12 @@ export default function OrganizerMapAnchorsEditor() {
         console.error(err);
         setLoading(false);
     });
-  }, [eventId, token]);
+  }, [eventSlug, token]);
 
   const handleSave = async () => {
-      if (!eventId || !token) return;
+      if (!eventSlug || !token) return;
       try {
-          await apiClient.put(`/organizer/events/${eventId}/map-anchors`, {
+          await apiClient.put(`/organizer/events/${eventSlug}/map-anchors`, {
               mapAnchorsJson: JSON.stringify(anchors)
           }, token);
           setNotification({ msg: "Saved!", type: "success" });

@@ -5,6 +5,7 @@ import { useAuth } from "../../state/AuthContext";
 
 interface EventLite {
   id: string;
+  slug: string;
   name: string;
   location: string;
   startTime: string;
@@ -56,9 +57,24 @@ const OrganizerEventPicker: React.FC = () => {
         token
       );
       // Success -> Navigate to scheduler
-      navigate(`/organizer/events/${res.id}`);
+      navigate(`/organizer/events/${res.slug}`);
     } catch (err: any) {
       setCreateError(err.message || "Failed to create event");
+    }
+  };
+
+  const handleArchive = async (evt: EventLite) => {
+    if (!token) return;
+    const confirmed = window.confirm(
+      `Archive event "${evt.name}"? This will deactivate vendors and hide the event.`
+    );
+    if (!confirmed) return;
+    try {
+      await apiClient.del(`/organizer/events/${evt.slug}`, token);
+      await loadEvents();
+      alert("Event archived successfully");
+    } catch (err: any) {
+      alert(err.message || "Failed to archive event");
     }
   };
 
@@ -106,10 +122,16 @@ const OrganizerEventPicker: React.FC = () => {
 
               <div className="mt-auto">
                 <button
-                  onClick={() => navigate(`/organizer/events/${evt.id}`)}
+                  onClick={() => navigate(`/organizer/events/${evt.slug}`)}
                   className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
                 >
                   Open Scheduler
+                </button>
+                <button
+                  onClick={() => handleArchive(evt)}
+                  className="mt-2 w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors"
+                >
+                  Archive
                 </button>
               </div>
             </div>
